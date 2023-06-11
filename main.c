@@ -23,7 +23,7 @@ typedef struct color
 
 typedef struct gameinfo
 {
-    uint64_t max_rect;
+    double max_rect;
     uint64_t max_rect_inc;
     uint64_t level;
     SDL_FRect *rects;
@@ -31,7 +31,7 @@ typedef struct gameinfo
     color *colors;
     float SPEED;
     float SPEED_INC;
-    uint64_t miss;
+    double miss;
 } gameinfo;
 
 uint64_t calk_bt(uint64_t max_rect);
@@ -78,7 +78,7 @@ int main(void)
     SDL_Texture* tmess = SDL_CreateTextureFromSurface(renderer, smess); 
     SDL_Rect rmess;
     rmess.h = 100;
-    rmess.w = 1000;
+    rmess.w = 1200;
     rmess.x = 0;
     rmess.y = 0;
 
@@ -142,14 +142,16 @@ int main(void)
 
                     memset(buff,0,sizeof(buff));
                     memset(text,0,sizeof(text));
-                    sprintf(buff, "%d", gmi.level);
+                    sprintf(buff, "%f", gmi.miss);
                     strcat(text, "level -> ");
                     strcat(text, buff);
                     memset(buff,0,sizeof(buff));
                     strcat(text, " ;last level prc -> ");
-                    float fl = (float) gmi.max_rect / (gmi.max_rect + gmi.miss);
-                    sprintf(buff, "%.2f%%", fl);
+
+                    memset(buff,0,sizeof(buff));
+                    sprintf(buff , "%.2f%%", (double) ((gmi.max_rect / (gmi.max_rect + gmi.miss + 0.0))) * 100.0);
                     strcat(text, buff);
+
 
                     smess = TTF_RenderText_Solid(calibri, text, font_color);
                     tmess = SDL_CreateTextureFromSurface(renderer, smess);
@@ -159,15 +161,14 @@ int main(void)
                 if (event.button.button == SDL_BUTTON_LEFT) {
                     for(uint64_t cout = 0; cout < gmi.max_rect; cout++)
                     {
-                        if(gmi.rects[cout].h != 0)
-                        {
-                            uint16_t mouse_x = (uint16_t) event.motion.x;
-                            uint16_t mouse_y = (uint16_t) event.motion.y;
-                            if(mouse_x >= gmi.rects[cout].x && mouse_x <= gmi.rects[cout].x + gmi.rects[cout].w &&
-                            mouse_y >= gmi.rects[cout].y && mouse_y <= gmi.rects[cout].y + gmi.rects[cout].h)
-                                gmi.rects[cout].h = 0;
-                            else gmi.miss++;
+                        Sint32 mouse_x = (Sint32) event.motion.x;
+                        Sint32 mouse_y = (Sint32) event.motion.y;
+                        if(mouse_x >= gmi.rects[cout].x && mouse_x <= gmi.rects[cout].x + gmi.rects[cout].w &&
+                        mouse_y >= gmi.rects[cout].y && mouse_y <= gmi.rects[cout].y + gmi.rects[cout].h) {
+                            gmi.rects[cout].h = 0;
                         }
+                        else gmi.miss++;
+                    
                     }
                 }
             }
@@ -242,13 +243,12 @@ int main(void)
                 sprintf(buff, "%d", gmi.level);
                 strcat(text, "level -> ");
                 strcat(text, buff);
+                strcat(text, "  last level -> ");
+
                 memset(buff,0,sizeof(buff));
-                strcat(text, " ;last level -> ");
-                float fl = (float) gmi.max_rect + gmi.miss;
-                fl = (float) fl / gmi.max_rect;
-                fl *= (float) 100;
-                sprintf(buff, "%2.f%%", fl);
+                sprintf(buff , "%.2f%%", (double) ((gmi.max_rect / (gmi.max_rect + gmi.miss + 0.0))) * 100.0);
                 strcat(text, buff);
+                gmi.miss = 0;
 
                 smess = TTF_RenderText_Solid(calibri, text, font_color);
                 tmess = SDL_CreateTextureFromSurface(renderer, smess);
